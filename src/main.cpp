@@ -71,6 +71,17 @@ int main(int argc, char *argv[])
     //Create a object for Camera property
     Cameraproperty camProperty;    
 
+    if(argc > 1){
+		if(strcmp(argv[1],"-l") == 0 || strcmp(argv[1],"--log") == 0){         
+			Cameraproperty camPropertyParam(true);
+        	}
+        else{
+            qDebug()<<"Usage: qtcam [OPTION]";
+            qDebug()<<"-l, --log    to create log in a directory\n";
+            return -1;
+        }
+    }
+
     viewer.rootContext()->setContextProperty("camModels", &camProperty.modelCam);
 
     Videostreaming vs;
@@ -80,7 +91,6 @@ int main(int argc, char *argv[])
     viewer.rootContext()->setContextProperty("fpsAvailable", &vs.fpsList);
     viewer.rootContext()->setContextProperty("SystemPictureFolder",QStandardPaths::standardLocations(QStandardPaths::PicturesLocation).first());
     viewer.rootContext()->setContextProperty("SystemVideoFolder",QStandardPaths::standardLocations(QStandardPaths::MoviesLocation).first());
-
 
     viewer.setMainQmlFile(QStringLiteral("/usr/share/qml/qtcam/videocapturefilter_QML/videocapturefilter_qml.qml"));
     QObject *rootObject = dynamic_cast<QObject*>(viewer.rootObject());

@@ -130,8 +130,7 @@ Rectangle {
     property variant aboutWindow
     property variant see3cam
 
-    onSeeCamCu51Capture: {
-        console.log("in onSeeCamCu51Capture",output_value.currentText.toString(), color_comp_box.currentIndex.toString())
+    onSeeCamCu51Capture: {        
         vidstreamproperty.setStillVideoSize(output_value.currentText.toString(), color_comp_box.currentIndex.toString())
         vidstreamproperty.makeShot(storage_path.text.toString(),imageFormatCombo.currentText.toString())
     }
@@ -2170,7 +2169,7 @@ Rectangle {
                 id: stillproperties //Still Capture settings
                 Button {
                     id: still_properties // still_capture_settings
-                    tooltip: "Still Capture Settings - \nAllows the user to set the image path and format(extension) \nfor photo capture"
+                    tooltip: "Still Capture Settings - \nAllows the user to set the image color space, image resolution,\nimage path, and image format(extension) for photo capture"
                     action: stillProperty
                     activeFocusOnPress : true
                     style: ButtonStyle {
@@ -2451,7 +2450,7 @@ Rectangle {
                     opacity: 1
                     action: videoCap
                     activeFocusOnPress : true
-                    tooltip: "Video Capture Settings - \nAllows the user to set the format(extension), encoder and video path\nfor video recording"
+                    tooltip: "Video Capture Settings - \nAllows the user to set the frame rate, preview color space,\npreview resolution, the format(extension), encoder and video path\nfor video recording"
                     style: ButtonStyle {
                         background: Rectangle {
                             implicitWidth: 265
@@ -3504,8 +3503,7 @@ Rectangle {
                 }
             }
             break;
-        case 9:
-            console.log("inside case 9"+controlName)
+        case 9:            
             break;
         }
 
