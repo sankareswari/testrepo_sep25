@@ -26,6 +26,7 @@ import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.1
 import econ.camera.property 1.0
 import econ.camera.stream 1.0
+import econ.camera.uvcsettings 1.0
 import "../JavaScriptFiles/tempValue.js" as JS
 
 Rectangle {
@@ -130,7 +131,7 @@ Rectangle {
     property variant aboutWindow
     property variant see3cam
 
-    onSeeCamCu51Capture: {        
+    onSeeCamCu51Capture: {
         vidstreamproperty.setStillVideoSize(output_value.currentText.toString(), color_comp_box.currentIndex.toString())
         vidstreamproperty.makeShot(storage_path.text.toString(),imageFormatCombo.currentText.toString())
     }
@@ -1664,11 +1665,15 @@ Rectangle {
                                         if(exposureComboEnable) {
                                             vidstreamproperty.selectMenuIndex(exposureAutoControlId,currentIndex)
                                             if(currentText.toString() == "Manual Mode") {
+                                                JS.autoExposureSelected = false
+                                                exposure_absolute.opacity = 1
                                                 exposure_Slider.opacity = 1
                                                 exposure_Slider.enabled = true
                                                 exposure_value.opacity = 1
                                                 exposure_value.enabled = true
                                             } else {
+                                                JS.autoExposureSelected = true
+                                                exposure_absolute.opacity = 0.1
                                                 exposure_Slider.opacity = 0.1
                                                 exposure_Slider.enabled = false
                                                 exposure_value.opacity = 0
@@ -1690,7 +1695,7 @@ Rectangle {
                                     font.family: "Ubuntu"
                                     color: "#ffffff"
                                     smooth: true
-                                    opacity: 0.1
+                                    opacity:  0
                                 }
                                 Slider {
                                     activeFocusOnPress: true
@@ -2047,7 +2052,7 @@ Rectangle {
                                         opacity: 0.1
                                     }
                                     CheckBox {
-                                        id: autoSelect_focus
+                                        id: autoSelect_focus                                        
                                         style: CheckBoxStyle {
                                             label: Text {
                                                 id: autofocus
@@ -2061,6 +2066,7 @@ Rectangle {
                                         }
                                         onCheckedChanged: {
                                             if(checked) {
+                                                JS.autoFocusChecked = true
                                                 camproperty.logDebugWriter("Focus control set in Auto Mode")
                                                 vidstreamproperty.changeSettings(focusControlAutoId,1)
                                                 focus_Slider.opacity = 0.1
@@ -2068,6 +2074,7 @@ Rectangle {
                                                 focus_value.opacity = 0
                                                 focus_value.enabled = false
                                             } else {
+                                                JS.autoFocusChecked = false
                                                 camproperty.logDebugWriter("Focus control set in Manual Mode")
                                                 vidstreamproperty.changeSettings(focusControlAutoId,0)
                                                 focus_Slider.opacity = 1
@@ -2865,12 +2872,14 @@ Rectangle {
                     x: 20
                     y: about.y - 50
                     id: average_frame
-                    text: "Current frame rate \nachieved"
+                    text: "Current frame rate achieved"
                     font.pixelSize: 14
                     font.family: "Ubuntu"
                     color: "#ffffff"
                     smooth: true
                     opacity: 1
+                    width: 150
+                    wrapMode: Text.WordWrap
                 }
                 TextField {
                     id: average_frame_value
@@ -3440,6 +3449,7 @@ Rectangle {
             break;
         case 2:
             if(controlName == "White Balance Temperature, Auto") {                
+                white_balance.opacity = 1
                 autoSelect_wb.opacity = 1
                 autoSelect_wb.enabled = true
                 autoSelect_wb.checked = controlDefaultValue
@@ -3453,6 +3463,7 @@ Rectangle {
                 autoSelect_focus.checked = controlDefaultValue
                 focusControlAutoId = ctrlID
                 if(!autoSelect_focus.checked) {
+                    JS.autoFocusChecked = false
                     focus_Slider.opacity = 1
                     focus_Slider.enabled = true
                     focus_value.opacity = 1
@@ -3496,14 +3507,18 @@ Rectangle {
                 exposureComboEnable =  true
                 exposureCombo.currentIndex = controlDefaultValue
                 if(exposureCombo.currentText == "Manual Mode"){
+                    JS.autoExposureSelected = false
+                    exposure_absolute.opacity = 1
                     exposure_Slider.enabled = true
                     exposure_Slider.opacity = 1
                     exposure_value.opacity = 1
                     exposure_value.enabled = true
+                }else{
+                    JS.autoExposureSelected = true
                 }
             }
             break;
-        case 9:            
+        case 9:
             break;
         }
 
@@ -3827,6 +3842,8 @@ Rectangle {
                 see3cam = Qt.createComponent("../UVCSettings/see3camar0130/uvc_ar0130.qml").createObject(root)
             } else if(device_box.currentText == "See3CAM_CU40") {
                 see3cam = Qt.createComponent("../UVCSettings/see3cam40/uvc40.qml").createObject(root)
+            } else if(device_box.currentText == "CX3-UVC") {
+                see3cam = Qt.createComponent("../UVCSettings/ascella/cx3-uvc.qml").createObject(root)
             } else {
                 see3cam = Qt.createComponent("../UVCSettings/others/others.qml").createObject(root)
             }
@@ -3923,6 +3940,6 @@ Rectangle {
     Keys.onRightPressed: {
         sideBarItems.visible = true
         open_sideBar.visible = false
-    }
+   }
 }
 

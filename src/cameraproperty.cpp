@@ -105,10 +105,10 @@ void Cameraproperty::setCurrentDevice(QString deviceIndex,QString deviceName) {
     }
 }
 
-void Cameraproperty::createLogger() {    
+void Cameraproperty::createLogger() {
     if (saveLog){
-		log.close();
-    	log.logFileCreation();
+	log.close();
+	log.logFileCreation();
     }
 }
 

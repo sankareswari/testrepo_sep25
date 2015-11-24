@@ -26,6 +26,7 @@ QMap<QString, QString> uvccamera::serialNumberMap;
 QString uvccamera::hidNode;
 
 int uvccamera::hid_fd;
+libusb_device_handle *uvccamera::handle;
 
 uvccamera::uvccamera()
 {
@@ -136,6 +137,72 @@ int uvccamera::findEconDevice(QStringList *econCamera,QString parameter)
     return 1;
 }
 
+int uvccamera::initExtensionUnitAscella(){
+    int ret;
+
+    kernelDriverDetached = 0;
+    libusb_init(NULL);
+    libusb_set_debug(NULL, 3);
+
+    handle = libusb_open_device_with_vid_pid(NULL, ASCELLA_VID, ASCELLA_PID);
+
+    if(!handle) {
+        emit logHandle(QtCriticalMsg, "\nunable to open the device\n");
+    } else {
+        emit logHandle(QtDebugMsg, "Device accessed successfully\n");
+
+        if (libusb_kernel_driver_active(handle, 2))
+        {
+            ret = libusb_detach_kernel_driver(handle, 2);
+            if (ret == 0)
+            {
+                kernelDriverDetached = 1;
+                emit logHandle(QtDebugMsg, "driver detachment successful\n");
+            }
+        }
+
+        ret = libusb_claim_interface(handle, 2);
+        if(ret == 0){
+            emit logHandle(QtDebugMsg, "Interfaced Claimed successfully\n");
+        }
+        else{
+            emit logHandle(QtCriticalMsg, "error claiming interface\n");
+        }
+
+     }
+
+     return ret;
+
+}
+
+int uvccamera::closeAscellaDevice(){
+    int res;
+
+    res = libusb_release_interface(handle, 2);
+
+    if (0 != res)
+    {
+       emit logHandle(QtCriticalMsg, "Error releasing interface\n");
+    }
+
+    if (kernelDriverDetached)
+    {
+        libusb_attach_kernel_driver(handle, 2);
+        emit logHandle(QtDebugMsg, "Attaching libusb kernel driver\n");
+    }
+
+    if(handle)
+    {
+        libusb_close(handle);
+        emit logHandle(QtDebugMsg, "Closing libusb\n");
+    }
+
+    libusb_exit(NULL);
+
+    handle = NULL;
+
+    return res;
+}
 
 bool uvccamera::readFirmwareVersion(quint8 *pMajorVersion, quint8 *pMinorVersion1, quint16 *pMinorVersion2, quint16 *pMinorVersion3) {
 
@@ -314,6 +381,12 @@ void uvccamera::getDeviceNodeName(QString hidDeviceNode) {
 void uvccamera::exitExtensionUnit() {
     close(hid_fd);
 }
+
+int uvccamera::exitExtensionUnitAscella(){
+    int ret = closeAscellaDevice();
+    return ret;
+}
+
 
 bool uvccamera::sendOSCode() {
 
